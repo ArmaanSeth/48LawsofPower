@@ -49,7 +49,7 @@ def get_vectorstore():
 def get_conversationchain():
     # llm=ChatOpenAI(temperature=0.2)
     vectorstore=get_vectorstore()
-    os.environ["GOOGLE_API_KEY"]="AIzaSyB3xjgb0DF84EvKsvKafVFdih9jpaj4jGQ"
+    
 
     llm=ChatGoogleGenerativeAI(model="gemini-pro", convert_system_message_to_human=True)
     memory = ConversationKGMemory(llm=llm,memory_key='chat_history', 
