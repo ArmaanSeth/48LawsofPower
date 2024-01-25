@@ -42,7 +42,13 @@ def get_conversationchain():
 
 # generating response from user queries and displaying them accordingly
 def handle_question(question):
-    res=st.session_state.conversation.invoke(question)
+    try:
+        res=st.session_state.conversation.invoke(question)
+    except Exception:
+        try:    
+            res=st.session_state.conversation.invoke(question)
+        except Exception as e:
+            print(e)
     # res=st.session_state.conversation.invoke({"input":question})
     st.session_state.chat_history.append([question,res["answer"]])
     for conversation in st.session_state.chat_history:
