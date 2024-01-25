@@ -2,7 +2,6 @@
 import os
 from dotenv import load_dotenv
 import streamlit as st
-from PyPDF2 import PdfReader
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Cassandra
 from langchain_core.prompts import PromptTemplate
@@ -22,50 +21,29 @@ Dont state about the context in the answer.
 Answer:
 """
 prompt1=PromptTemplate(template=prompt_template1,input_variables=["context","question"])
-# extracting text from pdf
-def get_pdf_text(docs):
-    text=""
-    for pdf in docs:
-        pdf_reader=PdfReader(pdf)
-        for page in pdf_reader.pages:
-            text+=page.extract_text()
-    return text
 
-
-# using all-MiniLm embeddings model and faiss to get vectorstore
 def get_vectorstore():
-    cassio.init(token=os.getenv("ASTRA_DB_APPLICATION_TOKEN"), database_id=os.getenv("ASTRA_DB_ID"), keyspace="default_keyspace")
+    cassio.init(token=os.getenv("ASTRA_DB_APPLICATION_TOKEN"), database_id=os.getenv("ASTRA_DB_ID"))
     astra_vector_store=Cassandra(
-        embedding=HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2",
-                                     model_kwargs={'device':'cpu'}),
+        embedding=HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2", model_kwargs={'device':'cpu'}),
         table_name="laws_of_power",
         session=None,
-        keyspace="default_keyspace"
+        keyspace=None
     )
     return astra_vector_store
 
 # generating conversation chain  
 def get_conversationchain():
-    # llm=ChatOpenAI(temperature=0.2)
     vectorstore=get_vectorstore()
-    
-
-    llm=ChatGoogleGenerativeAI(model="gemini-pro", convert_system_message_to_human=True, temperature=0.2)
-    memory = ConversationKGMemory(llm=llm,memory_key='chat_history', 
-                                      return_messages=True,
-                                      output_key='answer') # using conversation buffer memory to hold past information
-    chain = ConversationalRetrievalChain.from_llm(llm=llm,
-                                                  memory=memory,
-                                                  verbose=True,
-                                                  retriever=vectorstore.as_retriever(),
-                                                  combine_docs_chain_kwargs={"prompt": prompt1},
-                                                  chain_type="stuff",
-                                                  )
+    llm=ChatGoogleGenerativeAI(model="gemini-pro", convert_system_message_to_human=True,)
+    memory = ConversationKGMemory(llm=llm,memory_key='chat_history', return_messages=True) # using conversation buffer memory to hold past information
+    chain = ConversationalRetrievalChain.from_llm(llm=llm, memory=memory, verbose=True, combine_docs_chain_kwargs={"prompt":prompt1},retriever=vectorstore.as_retriever())
     return chain
 
 # generating response from user queries and displaying them accordingly
 def handle_question(question):
-    res=st.session_state.conversation({'question': question})
+    res=st.session_state.conversation.invoke(question)
+    # res=st.session_state.conversation.invoke({"input":question})
     st.session_state.chat_history.append([question,res["answer"]])
     for conversation in st.session_state.chat_history:
         st.write(user_template.replace("{{MSG}}",conversation[0]),unsafe_allow_html=True)
