@@ -48,7 +48,8 @@ def handle_question(question):
         try:    
             res=st.session_state.conversation.invoke(question)
         except Exception as e:
-            print("Please resubmit the prompt, an error has occured")
+            st.write("Please resubmit the prompt, an error has occured")
+            return
     # res=st.session_state.conversation.invoke({"input":question})
     st.session_state.chat_history.append([question,res["answer"]])
     for conversation in st.session_state.chat_history:
