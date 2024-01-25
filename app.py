@@ -75,7 +75,7 @@ def handle_question(question):
 
 def main():
     load_dotenv()
-    st.set_page_config(page_title="48 Laws of Power",page_icon=":books:")
+    st.set_page_config(page_title="48 Laws of Power",page_icon=":closed_book:")
     st.write(css,unsafe_allow_html=True)
     if "conversation" not in st.session_state:
         st.session_state.conversation=get_conversationchain()
@@ -83,8 +83,8 @@ def main():
     if "chat_history" not in st.session_state:
         st.session_state.chat_history=[]
     
-    st.header("48 Laws of Power :books:")
-    question=st.text_input("Ask question from your document:")
+    st.header(":closed_book: 48 Laws of Power ")
+    question=st.text_input("Ask question from the book:")
     if question:
         handle_question(question)
 
