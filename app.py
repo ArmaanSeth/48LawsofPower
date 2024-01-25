@@ -35,7 +35,7 @@ def get_vectorstore():
 # generating conversation chain  
 def get_conversationchain():
     vectorstore=get_vectorstore()
-    llm=ChatGoogleGenerativeAI(model="gemini-pro", convert_system_message_to_human=True)
+    llm=ChatGoogleGenerativeAI(model="gemini-pro", convert_system_message_to_human=True,temperature=0.2)
     memory = ConversationKGMemory(llm=llm,memory_key='chat_history', return_messages=True) # using conversation buffer memory to hold past information
     chain = ConversationalRetrievalChain.from_llm(llm=llm, memory=memory, verbose=True, combine_docs_chain_kwargs={"prompt":prompt1},retriever=vectorstore.as_retriever())
     return chain
@@ -48,7 +48,7 @@ def handle_question(question):
         try:    
             res=st.session_state.conversation.invoke(question)
         except Exception as e:
-            print(e)
+            print("Please resubmit the prompt, an error has occured")
     # res=st.session_state.conversation.invoke({"input":question})
     st.session_state.chat_history.append([question,res["answer"]])
     for conversation in st.session_state.chat_history:
