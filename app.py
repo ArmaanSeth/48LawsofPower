@@ -5,7 +5,7 @@ import streamlit as st
 from PyPDF2 import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores.cassandra import Cassandra
+from langchain_community.vectorstores import Cassandra
 from langchain_core.prompts import PromptTemplate
 from langchain.memory import ConversationKGMemory
 from langchain.chains import ConversationalRetrievalChain
@@ -35,13 +35,13 @@ def get_pdf_text(docs):
 
 # using all-MiniLm embeddings model and faiss to get vectorstore
 def get_vectorstore():
-    cassio.init(token=os.getenv("ASTRA_DB_APPLICATION_TOKEN"), database_id=os.getenv("ASTRA_DB_ID"))
+    cassio.init(token=os.getenv("ASTRA_DB_APPLICATION_TOKEN"), database_id=os.getenv("ASTRA_DB_ID"), keyspace="default_keyspace")
     astra_vector_store=Cassandra(
         embedding=HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2",
                                      model_kwargs={'device':'cpu'}),
         table_name="laws_of_power",
         session=None,
-        keyspace=None
+        keyspace="default_keyspace"
     )
     return astra_vector_store
 
