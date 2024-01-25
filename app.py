@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 import streamlit as st
 from PyPDF2 import PdfReader
-from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Cassandra
 from langchain_core.prompts import PromptTemplate
@@ -18,7 +17,7 @@ prompt_template1="""
 Answer the question based only on given context:
 Context: \n{context}\n
 Question: \n{question}\n
-Elaborate the answer giving all the information possible related to the question from the context in english, unless stated otherwise.
+Elaborate the answer giving all the information possible related to the question from the context in english
 Dont state about the context in the answer.
 Answer:
 """
@@ -51,7 +50,7 @@ def get_conversationchain():
     vectorstore=get_vectorstore()
     
 
-    llm=ChatGoogleGenerativeAI(model="gemini-pro", convert_system_message_to_human=True)
+    llm=ChatGoogleGenerativeAI(model="gemini-pro", convert_system_message_to_human=True, temperature=0.2)
     memory = ConversationKGMemory(llm=llm,memory_key='chat_history', 
                                       return_messages=True,
                                       output_key='answer') # using conversation buffer memory to hold past information
